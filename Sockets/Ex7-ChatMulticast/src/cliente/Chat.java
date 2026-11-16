@@ -112,6 +112,13 @@ public class Chat {
             return null;
         }
 
+        // a ordem que o sistema devolve as placas pode mudar de uma execução para outra:
+        // ordena pelo IP (como NÚMERO, não como texto), para a lista aparecer sempre na mesma ordem
+        Collections.sort(placas, (a, b) -> {
+            int porIp = Long.compare(ipComoNumero(ipv4De(a)), ipComoNumero(ipv4De(b)));
+            return porIp != 0 ? porIp : a.getDisplayName().compareTo(b.getDisplayName());
+        });
+
         if (args.length > 0) {                                  // IP informado na linha de comando
             for (NetworkInterface ni : placas) {
                 if (ipv4De(ni).equals(args[0])) return ni;
@@ -137,6 +144,13 @@ public class Chat {
             return null;
         }
         return placas.get(escolha - 1);
+    }
+
+    /** "10.51.2.183" -> 10*256^3 + 51*256^2 + 2*256 + 183. Comparar o número ordena os IPs corretamente. */
+    static long ipComoNumero(String ip) {
+        long numero = 0;
+        for (String parte : ip.split("\\.")) numero = numero * 256 + Integer.parseInt(parte);
+        return numero;
     }
 
     /** O primeiro endereço IPv4 da placa, ou null. */
